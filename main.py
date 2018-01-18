@@ -2,11 +2,27 @@ import ds18x20
 import machine
 import onewire
 import time
-
+import ujson
 
 # Read config
-#   Get essentials
-#   Loop tags
+f = open('config.json', 'r')
+configs = ujson.loads(f.read())
+f.close()
+
+# InfluxDB configs
+influx_host = configs.get("influxdb").get("host")
+influx_port = configs.get("influxdb").get("port")
+influx_database = configs.get("influxdb").get("database")
+influx_username = configs.get("influxdb").get("username")
+influx_password = configs.get("influxdb").get("password")
+
+# Tags
+print('Tags')
+tags = configs.get("tags")
+for key, value in tags.items():
+    print('{}: {}'.format(key, value))
+
+print()
 
 # Get data from sensors
 #   Loop sensors
@@ -38,4 +54,5 @@ print()
 
 
 # Send data to Influx
-#   REST api
+#   Build data string
+#   Send to REST api
