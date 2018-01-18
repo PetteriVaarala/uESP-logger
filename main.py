@@ -26,11 +26,10 @@ tags = configs.get("tags")
 for key, value in tags.items():
     print('{}: {}'.format(key, value))
 
-print()
+# TODO add sensor id & machine id as tags
+# machine.unique_id()
 
-# Get data from sensors
-#   Loop sensors
-#   Get some UID
+print()
 
 # the device is on GPIO12
 dat = machine.Pin(12)
@@ -44,19 +43,36 @@ sensors_num = len(sensors)
 print('Found {} devices.'.format(sensors_num))
 
 
-# print all temperatures
+# Get data from sensors
 print('Temperatures:')
 ds.convert_temp()
 time.sleep_ms(1000)
 for sensor in sensors:
     # https://forum.micropython.org/viewtopic.php?t=3677
+    # TODO: is this correct format for serial number?
     sensor_uid = hex(int.from_bytes(sensor, 'little'))
     sensor_temp = ds.read_temp(sensor)
     print('{}: {}'.format(sensor_uid, sensor_temp))
 
 print()
 
+print(machine.unique_id())
 
+# # TODO # #
+# Make main loop
+#   Sleep configured amount between meansurements
+# Configure ESP
+#   Deep sleep between meansurements
+# Configurations
+#   PIN?
+#   Network settings
+#   Sleep interval & type
 # Send data to Influx
 #   Build data string
 #   Send to REST api
+# Network
+#   Reconnect wlan if disconnected
+#   Configurable network settings
+# Startup
+#   Install everything necessary on startup (upip stuff)
+#   Configure network
