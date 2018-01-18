@@ -4,6 +4,10 @@ import onewire
 import time
 import ujson
 
+print('Welcome to uESP-logger')
+print('======================')
+print()
+
 # Read config
 f = open('config.json', 'r')
 configs = ujson.loads(f.read())
