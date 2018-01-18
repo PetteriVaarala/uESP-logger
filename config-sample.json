@@ -1,0 +1,13 @@
+{
+	"influxdb": {
+		"host": "",
+		"port": "",
+		"database": "",
+		"username": "",
+		"password": ""
+	},
+	"tags": {
+		"address": "",
+		"location": ""
+	}
+}
