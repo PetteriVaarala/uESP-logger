@@ -32,7 +32,8 @@ for key, value in tags.items():
 print()
 
 # the device is on GPIO12
-dat = machine.Pin(12)
+esp_pin = configs.get("esp").get("1wire_pin")
+dat = machine.Pin(esp_pin)
 
 # create the onewire object
 ds = ds18x20.DS18X20(onewire.OneWire(dat))

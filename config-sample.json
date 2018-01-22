@@ -1,13 +1,22 @@
 {
-	"influxdb": {
-		"host": "",
-		"port": "",
-		"database": "",
-		"username": "",
-		"password": ""
-	},
-	"tags": {
-		"address": "",
-		"location": ""
-	}
+    "influxdb": {
+        "host": "",
+        "port": "",
+        "database": "",
+        "username": "",
+        "password": ""
+    },
+    "tags": {
+        "address": "",
+        "location": ""
+    },
+    "esp": {
+        "1wire_pin": 12,
+        "sleep_sec": 60,
+        "sleep_type": ""
+    },
+    "network": {
+        "ssid": "",
+        "password": ""
+    }
 }
