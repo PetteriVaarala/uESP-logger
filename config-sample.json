@@ -17,6 +17,9 @@
     },
     "network": {
         "ssid": "",
-        "password": ""
+        "password": "",
+        "ap_enabled": true,
+        "ap_name": "",
+        "ap_password": ""
     }
 }
