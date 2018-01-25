@@ -4,6 +4,7 @@ import network
 import onewire
 import time
 import ujson
+import urequests
 
 
 def main():
@@ -19,19 +20,6 @@ def main():
 
     # Check network
     network_setup(configs)
-
-    # InfluxDB configs
-    influx_host = configs.get("influxdb").get("host")
-    influx_port = configs.get("influxdb").get("port")
-    influx_database = configs.get("influxdb").get("database")
-    influx_username = configs.get("influxdb").get("username")
-    influx_password = configs.get("influxdb").get("password")
-
-    # Tags
-    print('Tags')
-    tags = configs.get("tags")
-    for key, value in tags.items():
-        print('{}: {}'.format(key, value))
 
     # TODO add sensor id & machine id as tags
     # machine.unique_id()
@@ -61,9 +49,72 @@ def main():
         sensor_temp = ds.read_temp(sensor)
         print('{}: {}'.format(sensor_uid, sensor_temp))
 
+        send_influx(sensor_uid, sensor_temp, configs)
+
     print()
 
-    print(machine.unique_id())
+
+def send_influx(sensor_uid, sensor_temp, configs):
+    # curl -i -XPOST "http://HOSTNAME:PORT/write?db=DBNAME&u=USERNAME&p=PASSWORD" --data-binary 'mymeas,mytag=1 myfield=91'
+
+    # Build url
+    url = 'http://{}:{}/write?db={}&u={}&p={}'.format(
+        configs.get("influxdb").get("host"),
+        configs.get("influxdb").get("port"),
+        configs.get("influxdb").get("database"),
+        configs.get("influxdb").get("username"),
+        configs.get("influxdb").get("password")
+    )
+    print(url)
+
+    # Create list of tags, first are sensor & machine uids
+    tag_list = []
+    tag_list.append("sensor={}".format(sensor_uid))
+
+    # Machine UID
+    machine_uid = machine.unique_id()
+    esp_uid = hex(int.from_bytes(machine_uid, 'little'))
+    tag_list.append("esp_uid={}".format(esp_uid))
+
+    # Tags from config file
+    tags = configs.get("tags")
+    for key, value in tags.items():
+        # escape commas and spaces
+        value = value.replace(" ", "\ ")
+        key = key.replace(" ", "\ ")
+        value = value.replace(",", "\,")
+        key = key.replace(",", "\,")
+
+        print('{}: {}'.format(key, value))
+        tag_list.append('{}={}'.format(key, value))
+
+    # Join tags from list to a string
+    tag_string = ','.join(tag_list)
+    data = '{},{} temp={}'.format(
+        'temp',
+        tag_string,
+        sensor_temp
+    )
+    print(data)
+
+    # data = "mymeas,mytag=1 myfield=91"
+    r = urequests.post(url, data=data, headers={'Content-Type': 'application/octet-stream'})
+    status_code = r.status_code
+    if status_code is 204:
+        print("Success")
+    elif status_code is 400:
+        print("Bad Request")
+    elif status_code is 401:
+        print("Unauthorized")
+    elif status_code is 404:
+        print("Not Found")
+    elif status_code is 500:
+        print("Internal Server Error")
+
+    # It's mandatory to close response objects as soon as you finished
+    # working with them. On MicroPython platforms without full-fledged
+    # OS, not doing so may lead to resource leaks and malfunction.
+    r.close()
 
 
 def network_setup(configs):
