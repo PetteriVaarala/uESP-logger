@@ -44,8 +44,17 @@ def main():
     time.sleep_ms(1000)
     for sensor in sensors:
         # https://forum.micropython.org/viewtopic.php?t=3677
-        # TODO: is this correct format for serial number?
+        # The first 8 bits are a 1-Wire family code (DS18B20 code is 28h)
+        # The next 48 bits are a unique serial number
+        # The last 8 bits are a CRC of the first 56 bit
+        # https://cdn.sparkfun.com/datasheets/Sensors/Temp/DS18B20.pdf
+
+        # 0x8400000728e7b028        => 28-00000728e7b0
+        # 0x8300000729d3be28        => 28-00000729d3be
+        # CRC \  Serial  / Family
+
         sensor_uid = hex(int.from_bytes(sensor, 'little'))
+        sensor_uid = "{}-{}".format(sensor_uid[-2:], sensor_uid[4:-2])
         sensor_temp = ds.read_temp(sensor)
         print('{}: {}'.format(sensor_uid, sensor_temp))
 
@@ -85,7 +94,7 @@ def send_influx(sensor_uid, sensor_temp, configs):
         value = value.replace(",", "\,")
         key = key.replace(",", "\,")
 
-        print('{}: {}'.format(key, value))
+        # print('{}: {}'.format(key, value))
         tag_list.append('{}={}'.format(key, value))
 
     # Join tags from list to a string
